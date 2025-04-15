@@ -6,31 +6,12 @@
 /*   By: polmo-lo <polmo-lo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 01:48:55 by aporras-          #+#    #+#             */
-/*   Updated: 2025/04/15 21:31:41 by polmo-lo         ###   ########.fr       */
+/*   Updated: 2025/04/15 22:09:15 by polmo-lo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-
-void	send_signal(int pid, unsigned char character)
-{
-	int				i;
-	unsigned char	temp_char;
-
-	i = 8;
-	temp_char = character;
-	while (i > 0)
-	{
-		i--;
-		temp_char = character >> i;
-		if (temp_char % 2 == 0)
-			kill(pid, SIGUSR2);
-		else
-			kill(pid, SIGUSR1);
-		usleep(150);
-	}
-}
 int	ft_isdigit(int c)
 {
 	return (c >= '0' && c <= '9');
@@ -61,23 +42,40 @@ int	ft_atoi(const char *str)
 	return (num * sign);
 }
 
-
-int	main(int argc, char *argv[])
+void	send_signal(int pid, unsigned char *mesage, size_t len)
 {
-	pid_t		server_pid;
-	const char	*message;
-	int			i;
+	int	i;
+	int	bit;
 
-	if (argc != 3)
-	{
-		ft_printf("Usage: %s <pid> <message>\n", argv[0]);
-		exit(0);
-	}
-	server_pid = ft_atoi(argv[1]);
-	message = argv[2];
 	i = 0;
-	while (message[i])
-		send_signal(server_pid, message[i++]);
-	send_signal(server_pid, '\0');
-	return (0);
+	while (len > 0)
+	{
+		bit = 0;
+		while (bit < 8)
+		{
+			if ((mesage[i] >> (7 - bit) & 1))
+				kill(pid, SIGUSR1);
+			else
+				kill(pid, SIGUSR2);
+			bit++;
+			usleep(42);
+		}
+		i++;
+		len--;
+	}
+}
+
+int	main(int argc, char **argv)
+{
+	int				pid;
+	unsigned char	*mesage;
+
+	if (argc == 3)
+	{
+		pid = ft_atoi(argv[1]);
+		mesage = (unsigned char *)argv[2];
+		send_signal(pid, mesage, (ft_strlen((const char *)mesage) + 1));
+	}
+	else
+		ft_printf("Sintax: %s [PID_servidor] [Mensage]", argv[0]);
 }

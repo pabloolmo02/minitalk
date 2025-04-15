@@ -6,39 +6,38 @@
 /*   By: polmo-lo <polmo-lo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 20:56:50 by aporras-          #+#    #+#             */
-/*   Updated: 2025/04/15 21:26:28 by polmo-lo         ###   ########.fr       */
+/*   Updated: 2025/04/15 22:11:12 by polmo-lo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-void	handle_signal(int signal)
-{
-	static unsigned char	current_char;
-	static int				bit_index;
+t_bitargument	g_bitargument;
 
-	current_char |= (signal == SIGUSR1);
-	bit_index++;
-	if (bit_index == 8)
+void	handle_signal(int bit)
+{
+	if (bit == SIGUSR1)
+		g_bitargument.c = (g_bitargument.c << 1) | 1;
+	else if (bit == SIGUSR2)
+		g_bitargument.c = (g_bitargument.c << 1) | 0;
+	g_bitargument.recive++;
+	if (g_bitargument.recive == 8)
 	{
-		if (current_char == END_TRANSMISSION)
+		if (g_bitargument.c == '\0')
 			ft_printf("\n");
 		else
-			ft_printf("%c", current_char);
-		bit_index = 0;
-		current_char = 0;
+			ft_printf("%c", g_bitargument.c);
+		g_bitargument.c = 0;
+		g_bitargument.recive = 0;
 	}
-	else
-		current_char <<= 1;
 }
 
 int	main(void)
 {
-	ft_printf("PID: ");
-	ft_printf("%d\n", getpid());
+	ft_printf("Server PID: %i\n", getpid());
 	signal(SIGUSR1, handle_signal);
 	signal(SIGUSR2, handle_signal);
 	while (1)
-		pause();
+		;
 	return (0);
 }

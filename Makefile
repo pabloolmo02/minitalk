@@ -3,7 +3,7 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
 # Paths
-PRINTF_DIR = printf
+PRINTF_DIR = printff
 PRINTF_LIB = $(PRINTF_DIR)/libftprintf.a
 
 # Archivos fuente y binarios
